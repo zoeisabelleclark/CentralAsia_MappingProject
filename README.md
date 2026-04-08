@@ -1,6 +1,6 @@
-# Central Asia Languages Map
+# Central Asia Ethnicities Map
 
-Interactive map of languages spoken across Central Asia using census and boundary data.
+Interactive map of ethnicities spoken across Central Asia using census and boundary data. ONGOING UNFINISHED PROJECT
 
 ## Stack
 - Python for data processing

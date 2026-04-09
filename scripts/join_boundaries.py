@@ -3,27 +3,64 @@ import pandas as pd
 import geopandas as gpd
 
 INTERIM = Path("data/interim")
-RAW = Path("data/raw/boundaries")
 OUT = Path("data/processed")
 OUT.mkdir(parents=True, exist_ok=True)
 
 def main():
+    # Load cleaned census data
     stats = pd.read_csv(INTERIM / "census_clean.csv")
 
-    # Replace with actual boundary file
-    regions = gpd.read_file(RAW / "regions.geojson")
+    # Load prepared boundaries, not raw boundaries
+    regions = gpd.read_file(INTERIM / "kazakhstan_regions.json")
 
-    regions["region_name"] = regions["region_name"].str.strip()
+    # Basic cleanup
+    stats["region_key"] = stats["region_key"].astype(str).str.strip()
+    stats["ethnicity"] = stats["ethnicity"].astype(str).str.strip()
+    stats["population"] = pd.to_numeric(stats["population"], errors="coerce")
 
-    # Example aggregation: dominant language by region
-    idx = stats.groupby("region_name")["speakers"].idxmax()
-    dominant = stats.loc[idx, ["region_name", "language", "speakers", "percent"]]
+    regions["region_key"] = regions["region_key"].astype(str).str.strip()
+    regions["region_name"] = regions["region_name"].astype(str).str.strip()
 
-    merged = regions.merge(dominant, on="region_name", how="left")
+    # Drop rows with missing population
+    stats = stats.dropna(subset=["population"])
+
+    # Calculate total population by region
+    totals = (
+        stats.groupby("region_key", as_index=False)["population"]
+        .sum()
+        .rename(columns={"population": "region_total_population"})
+    )
+
+    # Find dominant ethnicity by region
+    idx = stats.groupby("region_key")["population"].idxmax()
+    dominant = stats.loc[idx, ["region_key", "ethnicity", "population"]].copy()
+
+    dominant = dominant.rename(columns={
+        "ethnicity": "dominant_ethnicity",
+        "population": "dominant_population"
+    })
+
+    # Add totals and percent
+    dominant = dominant.merge(totals, on="region_key", how="left")
+    dominant["dominant_percent"] = (
+        dominant["dominant_population"] / dominant["region_total_population"] * 100
+    )
+
+    # Merge onto boundaries
+    merged = regions.merge(dominant, on="region_key", how="left")
+
+    # Write outputs
     merged.to_file(OUT / "regions.geojson", driver="GeoJSON")
+    stats.to_json(OUT / "ethnicity_stats.json", orient="records", force_ascii=False)
 
-    stats.to_json(OUT / "language_stats.json", orient="records", force_ascii=False)
-    print("Wrote processed outputs")
+    print("Wrote data/processed/regions.geojson")
+    print("Wrote data/processed/ethnicity_stats.json")
+
+    # Optional debug: show unmatched regions
+    missing = merged[merged["dominant_ethnicity"].isna()][["region_key", "region_name"]]
+    if not missing.empty:
+        print("\nRegions with no matched ethnicity data:")
+        print(missing.to_string(index=False))
 
 if __name__ == "__main__":
     main()

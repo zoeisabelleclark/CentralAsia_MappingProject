@@ -13,8 +13,9 @@ Interactive map of ethnicities spoken across Central Asia using census and bound
 - `scripts` ETL pipeline
 - `web` front-end app
 
-## First run
-1. Create and activate virtualenv
-2. Install Python requirements
-3. Build processed GeoJSON and JSON
-4. Start front end
+## Processing Data 
+- clean 
+- inspect 
+- prepare/reshape
+- compare/crosswalk
+- join 

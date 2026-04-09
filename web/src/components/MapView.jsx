@@ -1,9 +1,10 @@
+import React from "react";
+import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import regions from "../data/regions.geojson";
 
 function getFillColor(feature) {
-    const pct = feature.properties.percent ?? 0;
+    const pct = feature?.properties?.dominant_percent ?? 0;
     if (pct > 75) return "#0f172a";
     if (pct > 50) return "#334155";
     if (pct > 25) return "#64748b";
@@ -22,30 +23,56 @@ function style(feature) {
 }
 
 function onEachFeature(feature, layer) {
-    const name = feature.properties.region_name || "Unknown region";
-    const language = feature.properties.ethnicities || "No data";
-    const percent = feature.properties.percent ?? "n/a";
+    const props = feature.properties || {};
+    const name = props.region_name || "Unknown region";
+    const ethnicity = props.dominant_ethnicity || "No data";
+    const percent =
+        props.dominant_percent != null
+            ? `${Number(props.dominant_percent).toFixed(1)}%`
+            : "n/a";
 
     layer.bindPopup(`
     <strong>${name}</strong><br/>
-    Dominant language: ${language}<br/>
+    Dominant ethnicity: ${ethnicity}<br/>
     Percent: ${percent}
   `);
 }
 
 export default function MapView() {
+    const [regions, setRegions] = useState(null);
+
+    useEffect(() => {
+        fetch("/data/regions.geojson")
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error(`Failed to load GeoJSON: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then((data) => setRegions(data))
+            .catch((err) => console.error(err));
+    }, []);
+
     return (
-        <MapContainer
-            center={[43.5, 68.0]}
-            zoom={4}
-            scrollWheelZoom={true}
-            className="h-full w-full"
-        >
-            <TileLayer
-                attribution='&copy; OpenStreetMap contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <GeoJSON data={regions} style={style} onEachFeature={onEachFeature} />
-        </MapContainer>
+        <div style={{ height: "80vh", width: "100%" }}>
+            <MapContainer
+                center={[48, 68]}
+                zoom={5}
+                scrollWheelZoom={true}
+                style={{ height: "100%", width: "100%" }}
+            >
+                <TileLayer
+                    attribution="&copy; OpenStreetMap contributors"
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {regions && (
+                    <GeoJSON
+                        data={regions}
+                        style={style}
+                        onEachFeature={onEachFeature}
+                    />
+                )}
+            </MapContainer>
+        </div>
     );
 }

@@ -1,71 +1,201 @@
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import Legend from "./Legend";
 
-function getFillColor(feature) {
-    const pct = feature?.properties?.dominant_percent ?? 0;
-    if (pct > 75) return "#0f172a";
-    if (pct > 50) return "#334155";
-    if (pct > 25) return "#64748b";
-    if (pct > 10) return "#94a3b8";
+function getPercentColor(value) {
+    if (value > 75) return "#0f172a";
+    if (value > 50) return "#334155";
+    if (value > 25) return "#64748b";
+    if (value > 10) return "#94a3b8";
     return "#cbd5e1";
 }
 
-function style(feature) {
-    return {
-        fillColor: getFillColor(feature),
-        weight: 1,
-        opacity: 1,
-        color: "white",
-        fillOpacity: 0.8,
-    };
+function getDiversityColor(value) {
+    if (value > 1.2) return "#0f172a";
+    if (value > 1.0) return "#334155";
+    if (value > 0.8) return "#64748b";
+    if (value > 0.5) return "#94a3b8";
+    return "#cbd5e1";
 }
 
-function onEachFeature(feature, layer) {
-    layer.on({
-        mouseover: (e) => {
-            e.target.setStyle({
-                weight: 2,
-                color: "#000",
-                fillOpacity: 0.9,
-            });
-        },
-        mouseout: (e) => {
-            e.target.setStyle({
-                weight: 1,
-                color: "white",
-                fillOpacity: 0.8,
-            });
-        }
-    });
-
-    const props = feature.properties;
-    layer.bindPopup(`
-    <strong>${props.region_name}</strong><br/>
-    ${props.dominant_ethnicity}<br/>
-    ${props.dominant_percent?.toFixed(1)}%
-  `);
+function LegendRow({ color, label }) {
+    return (
+        <div
+            style={{
+                display: "grid",
+                gridTemplateColumns: "16px 1fr",
+                gap: "0.65rem",
+                alignItems: "center",
+            }}
+        >
+            <div
+                style={{
+                    width: "16px",
+                    height: "16px",
+                    borderRadius: "4px",
+                    background: color,
+                    border: "1px solid rgba(17, 24, 39, 0.08)",
+                }}
+            />
+            <div style={{ fontSize: "0.92rem", color: "#374151" }}>{label}</div>
+        </div>
+    );
 }
 
-export default function MapView() {
-    const [regions, setRegions] = useState(null);
-
-    useEffect(() => {
-        fetch("/data/regions.geojson")
-            .then((res) => {
-                if (!res.ok) {
-                    throw new Error(`Failed to load GeoJSON: ${res.status}`);
-                }
-                return res.json();
-            })
-            .then((data) => setRegions(data))
-            .catch((err) => console.error(err));
-    }, []);
+function Legend({ viewMode, selectedEthnicity }) {
+    const rows =
+        viewMode === "diversity"
+            ? [
+                { color: "#0f172a", label: "1.2+" },
+                { color: "#334155", label: "1.0–1.2" },
+                { color: "#64748b", label: "0.8–1.0" },
+                { color: "#94a3b8", label: "0.5–0.8" },
+                { color: "#cbd5e1", label: "< 0.5" },
+            ]
+            : [
+                { color: "#0f172a", label: "75%+" },
+                { color: "#334155", label: "50–75%" },
+                { color: "#64748b", label: "25–50%" },
+                { color: "#94a3b8", label: "10–25%" },
+                { color: "#cbd5e1", label: "< 10%" },
+            ];
 
     return (
-        <div style={{ height: "80vh", width: "100%" }}>
+        <div
+            style={{
+                position: "absolute",
+                bottom: "24px",
+                right: "24px",
+                zIndex: 1000,
+                background: "rgba(255,255,255,0.92)",
+                backdropFilter: "blur(10px)",
+                border: "1px solid #e5e7eb",
+                borderRadius: "16px",
+                padding: "0.95rem 1rem",
+                boxShadow: "0 10px 24px rgba(15, 23, 42, 0.12)",
+                minWidth: "210px",
+            }}
+        >
+            <div
+                style={{
+                    fontSize: "0.78rem",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.04em",
+                    color: "#6b7280",
+                    marginBottom: "0.5rem",
+                }}
+            >
+                Legend
+            </div>
+
+            <div style={{ fontWeight: 700, marginBottom: "0.75rem", lineHeight: 1.3 }}>
+                {viewMode === "diversity"
+                    ? "Shannon diversity index"
+                    : selectedEthnicity === "dominant"
+                        ? "Dominant ethnicity share"
+                        : `${selectedEthnicity} share`}
+            </div>
+
+            <div style={{ display: "grid", gap: "0.45rem" }}>
+                {rows.map((row) => (
+                    <LegendRow key={row.label} color={row.color} label={row.label} />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+export default function MapView({
+    regions,
+    ethnicityStats,
+    selectedEthnicity,
+    viewMode,
+    onSelectRegion,
+}) {
+    const ethnicityLookup = useMemo(() => {
+        const lookup = {};
+
+        for (const row of ethnicityStats) {
+            const regionKey = row.region_key;
+            const ethnicity = row.ethnicity;
+            const percent = Number(row.percent);
+
+            if (!lookup[regionKey]) lookup[regionKey] = {};
+            lookup[regionKey][ethnicity] = percent;
+        }
+
+        return lookup;
+    }, [ethnicityStats]);
+
+    function style(feature) {
+        const props = feature.properties || {};
+        const regionKey = props.region_key;
+
+        let value = 0;
+
+        if (viewMode === "diversity") {
+            value = Number(props.diversity_index || 0);
+        } else if (selectedEthnicity === "dominant") {
+            value = Number(props.dominant_percent || 0);
+        } else {
+            value = Number(ethnicityLookup?.[regionKey]?.[selectedEthnicity] || 0);
+        }
+
+        return {
+            fillColor: viewMode === "diversity" ? getDiversityColor(value) : getPercentColor(value),
+            weight: 1,
+            opacity: 1,
+            color: "white",
+            fillOpacity: 0.8,
+        };
+    }
+
+    function onEachFeature(feature, layer) {
+        const props = feature.properties || {};
+        const regionKey = props.region_key;
+
+        layer.on({
+            mouseover: (e) => {
+                e.target.setStyle({
+                    weight: 2,
+                    color: "#000",
+                    fillOpacity: 0.9,
+                });
+            },
+            mouseout: (e) => {
+                e.target.setStyle(style(feature));
+            },
+            click: () => {
+                onSelectRegion(props);
+            },
+        });
+
+        let body = "";
+
+        if (viewMode === "diversity") {
+            body = `Diversity index: ${props.diversity_index != null ? Number(props.diversity_index).toFixed(3) : "n/a"
+                }`;
+        } else if (selectedEthnicity === "dominant") {
+            body = `Dominant ethnicity: ${props.dominant_ethnicity || "n/a"}<br/>
+              Share: ${props.dominant_percent != null
+                    ? Number(props.dominant_percent).toFixed(1) + "%"
+                    : "n/a"
+                }`;
+        } else {
+            const pct = ethnicityLookup?.[regionKey]?.[selectedEthnicity];
+            body = `${selectedEthnicity}: ${pct != null ? Number(pct).toFixed(1) + "%" : "0.0%"
+                }`;
+        }
+
+        layer.bindPopup(`
+      <strong>${props.region_name || "Unknown region"}</strong><br/>
+      ${body}
+    `);
+    }
+
+    return (
+        <div style={{ position: "relative", height: "100vh", width: "100%" }}>
             <MapContainer
                 center={[48, 68]}
                 zoom={5}
@@ -76,15 +206,10 @@ export default function MapView() {
                     attribution="&copy; OpenStreetMap contributors"
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-                {regions && (
-                    <GeoJSON
-                        data={regions}
-                        style={style}
-                        onEachFeature={onEachFeature}
-                    />
-                )}
+                <GeoJSON data={regions} style={style} onEachFeature={onEachFeature} />
             </MapContainer>
-            <Legend></Legend>
+
+            <Legend viewMode={viewMode} selectedEthnicity={selectedEthnicity} />
         </div>
     );
 }

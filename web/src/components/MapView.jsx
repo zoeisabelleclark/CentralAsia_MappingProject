@@ -2,6 +2,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import Legend from "./Legend";
 
 function getFillColor(feature) {
     const pct = feature?.properties?.dominant_percent ?? 0;
@@ -23,18 +24,28 @@ function style(feature) {
 }
 
 function onEachFeature(feature, layer) {
-    const props = feature.properties || {};
-    const name = props.region_name || "Unknown region";
-    const ethnicity = props.dominant_ethnicity || "No data";
-    const percent =
-        props.dominant_percent != null
-            ? `${Number(props.dominant_percent).toFixed(1)}%`
-            : "n/a";
+    layer.on({
+        mouseover: (e) => {
+            e.target.setStyle({
+                weight: 2,
+                color: "#000",
+                fillOpacity: 0.9,
+            });
+        },
+        mouseout: (e) => {
+            e.target.setStyle({
+                weight: 1,
+                color: "white",
+                fillOpacity: 0.8,
+            });
+        }
+    });
 
+    const props = feature.properties;
     layer.bindPopup(`
-    <strong>${name}</strong><br/>
-    Dominant ethnicity: ${ethnicity}<br/>
-    Percent: ${percent}
+    <strong>${props.region_name}</strong><br/>
+    ${props.dominant_ethnicity}<br/>
+    ${props.dominant_percent?.toFixed(1)}%
   `);
 }
 
@@ -73,6 +84,7 @@ export default function MapView() {
                     />
                 )}
             </MapContainer>
+            <Legend></Legend>
         </div>
     );
 }

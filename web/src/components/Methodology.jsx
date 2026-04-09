@@ -12,7 +12,7 @@ export default function Methodology() {
 
             <h3>Data sources</h3>
             <p>
-                2026 Regional ethnicity counts from <a href="https://stat.gov.kz/en/industries/social-statistics/demography/">the kazakh government statistic website</a> and
+                2026 Regional ethnicity counts from <a href="https://stat.gov.kz/en/industries/social-statistics/demography/">the Kazakh government statistic website</a> and
                 Level-1 administrative boundaries in GeoJSON format from <a href="https://simplemaps.com/gis/country/kz">Simple Maps</a>
             </p>
 

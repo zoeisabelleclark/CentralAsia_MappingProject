@@ -208,7 +208,7 @@ export default function App() {
                     </div>
                 ) : (
                     <div style={{ ...panelStyle, padding: "0.5rem" }}>
-                        <Methodology />
+                        Overarching strategy and rationale of the research project and methods/data used.
                     </div>
                 )}
             </aside>

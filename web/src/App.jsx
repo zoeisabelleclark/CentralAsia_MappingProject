@@ -46,16 +46,24 @@ export default function App() {
     const [viewMode, setViewMode] = useState("ethnicity");
     const [selectedRegion, setSelectedRegion] = useState(null);
     const [activePanel, setActivePanel] = useState("map");
+    const [selectedCountry, setSelectedCountry] = useState("kazakhstan");
+    const countryLabel = selectedCountry === "kazakhstan" ? "Kazakhstan" : "Kyrgyzstan";
 
     useEffect(() => {
-        fetch("/data/kyrgyzstan/regions.geojson")
+        setRegions(null);
+        setEthnicityStats([]);
+        setSelectedEthnicity("dominant");
+        setSelectedRegion(null);
+
+
+        fetch(`/data/${selectedCountry}/regions.geojson`)
             .then((res) => res.json())
             .then((data) => setRegions(data));
 
-        fetch("/data/kyrgyzstan/ethnicity_stats.json")
+        fetch(`/data/${selectedCountry}/ethnicity_stats.json`)
             .then((res) => res.json())
             .then((data) => setEthnicityStats(data));
-    }, []);
+    }, [selectedCountry]);
 
     const ethnicityOptions = useMemo(() => {
         const values = [...new Set(ethnicityStats.map((d) => d.ethnicity).filter(Boolean))];
@@ -92,7 +100,7 @@ export default function App() {
                         Central Asia Mapping Project
                     </div>
                     <h1 style={{ margin: 0, fontSize: "1.6rem", lineHeight: 1.1 }}>
-                        Kazakhstan Ethnicity Explorer
+                        {countryLabel} Ethnicity Explorer
                     </h1>
                 </div>
 
@@ -106,6 +114,20 @@ export default function App() {
                     >
                         Methodology
                     </button>
+                </div>
+
+                <div style={{ marginBottom: "1rem" }}>
+                    <label style={{ display: "block", fontWeight: 600, marginBottom: "0.45rem" }}>
+                        Country
+                    </label>
+                    <select
+                        value={selectedCountry}
+                        onChange={(e) => setSelectedCountry(e.target.value)}
+                        style={controlStyle}
+                    >
+                        <option value="kazakhstan">Kazakhstan</option>
+                        <option value="kyrgyzstan">Kyrgyzstan</option>
+                    </select>
                 </div>
 
                 {activePanel === "map" ? (

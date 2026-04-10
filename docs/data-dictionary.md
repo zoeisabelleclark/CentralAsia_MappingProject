@@ -1,10 +1,17 @@
-| field | description |
-|---|---|
-| region_id | stable join key |
-| region_name | display name |
-| country | country name |
-| language | language label |
-| speakers | absolute number |
-| percent | share of population |
-| census_year | source year |
-| source | source note |
+##Cleaned collumns
+country
+region_key
+region_name
+ethnicity
+population
+region_total_population
+percent
+
+##Summary geometry
+country
+region_key
+region_name
+dominant_ethnicity
+dominant_percent
+diversity_index
+geometry

@@ -1,20 +1,18 @@
 from pathlib import Path
 import pandas as pd
 
-INFILE = Path("data/raw/census/kazakhstan_ethnicity.csv")
+INFILE = Path("data/raw/kyrgyzstan/census/ethnicity_by_region_eng.csv")
 
-df = pd.read_csv(INFILE)
+def main():
+    df = pd.read_csv(INFILE)
+    print("\nColumns:")
+    print(df.columns.tolist())
 
-print("\nColumns:")
-print(list(df.columns))
+    print("\nFirst 10 rows:")
+    print(df.head(10).to_string())
 
-print("\nFirst rows:")
-print(df.head())
+if __name__ == "__main__":
+    main()
 
-print("\nUnique region names:")
-for r in sorted(df["region_name"].dropna().astype(str).str.strip().unique()):
-    print("-", r)
 
-print("\nUnique ethnicities:")
-for l in sorted(df["ethnicity"].dropna().astype(str).str.strip().unique()):
-    print("-", l)
+

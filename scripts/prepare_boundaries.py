@@ -4,8 +4,8 @@ import pandas as pd
 import re
 import unicodedata
 
-INFILE = Path("data/raw/boundaries/kazakhstan_new_level1.json")
-OUTFILE = Path("data/interim/kazakhstan_regions.json")
+INFILE = Path("data/raw/kyrgyzstan/boundaries/kg.json")
+OUTFILE = Path("data/interim/kyrgyzstan/kg_regions.json")
 
 def slugify(text: str) -> str:
     text = str(text).strip()
@@ -26,8 +26,8 @@ def main():
 
     # make display names nicer
     gdf["region_name"] = gdf["region_name"].str.replace(r"([a-z])([A-Z])", r"\1 \2", regex=True)
-    gdf["region_key"] = "KAZ_" + gdf["region_name"].apply(slugify)
-    gdf["country"] = "Kazakhstan"
+    gdf["region_key"] = "KGZ_" + gdf["region_name"].apply(slugify)
+    gdf["country"] = "Kyrgyzstan"
 
     print(gdf[["region_name", "region_key"]])
 

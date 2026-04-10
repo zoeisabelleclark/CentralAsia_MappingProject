@@ -48,11 +48,11 @@ export default function App() {
     const [activePanel, setActivePanel] = useState("map");
 
     useEffect(() => {
-        fetch("/data/regions.geojson")
+        fetch("/data/kyrgyzstan/regions.geojson")
             .then((res) => res.json())
             .then((data) => setRegions(data));
 
-        fetch("/data/ethnicity_stats.json")
+        fetch("/data/kyrgyzstan/ethnicity_stats.json")
             .then((res) => res.json())
             .then((data) => setEthnicityStats(data));
     }, []);

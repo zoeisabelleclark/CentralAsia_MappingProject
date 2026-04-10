@@ -1,8 +1,8 @@
 from pathlib import Path
 import geopandas as gpd
 
-INFILE = Path("data/interim/kazakhstan_regions.json")
-OUTFILE = Path("data/interim/kazakhstan_region_reference.csv")
+INFILE = Path("data/interim/uzbekistan/uz_regions.json")
+OUTFILE = Path("data/interim/uzbekistan/uzbekistan_region_reference.csv")
 
 gdf = gpd.read_file(INFILE)
 df = gdf[["region_key", "region_name", "country"]].copy()

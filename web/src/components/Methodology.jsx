@@ -19,14 +19,18 @@ export default function Methodology() {
             <h5>Kyrgyzstan</h5>
             <p>2020-2024 regional ethnicity counts from the appendix of the <a href="https://www.stat.gov.kg/ru/publications/demograficheskij-ezhegodnik-kyrgyzskoj-respubliki/">2025 demographic yearbook</a> and Level-1 administrative boundaries in GeoJSON format from <a href="https://simplemaps.com/gis/country/kg">Simple Maps</a></p>
 
+
+            <h5>Uzbekistan</h5>
+            <p>2023 rural/urban population from <a href="https://stat.uz/en/official-statistics/demography">Uzbek national statistics site</a> and Level-1 administrative boundaries in GeoJSON format from <a href="https://simplemaps.com/gis/country/uz">Simple Maps</a></p>
+
+
             <h3>Processing steps</h3>
             <ol>
-                <li>Reshaped the original ethnicity table from wide format into long format.</li>
+                <li>Reshaped the original tables from wide format into long format.</li>
                 <li>Cleaned region names and standardized text encoding issues.</li>
                 <li>Mapped source region names to boundary regions using a crosswalk.</li>
-                <li>Joined ethnicity counts to level-1 regional boundaries.</li>
-                <li>Computed within-region ethnicity shares.</li>
-                <li>Calculated dominant ethnicity and Shannon diversity index for each region.</li>
+                <li>Joined statistical counts to level-1 regional boundaries.</li>
+                <li>Computed within-region shares.</li>
             </ol>
 
             <h3>Definitions</h3>
@@ -43,6 +47,7 @@ export default function Methodology() {
             <h3>Caveats</h3>
             <ul>
                 <li>Results depend on the regional categories and naming conventions used in the source tables.</li>
+                <li>Not every country publishes the same categories of data which is why some metrics are only available in some countries</li>
                 <li>Crosswalk mappings may simplify or harmonize source geography to match the boundary dataset.</li>
                 <li>Ethnicity is not the same as language, nationality, or identity in all contexts.</li>
             </ul>

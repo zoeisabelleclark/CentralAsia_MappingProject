@@ -1,7 +1,7 @@
 from pathlib import Path
 import geopandas as gpd
 
-BOUNDARY_FILE = Path("data/raw/boundaries/kazakhstan_new_level1.json")
+BOUNDARY_FILE = Path("data/raw/kyrgyzstan/boundaries/kg.json")
 
 gdf = gpd.read_file(BOUNDARY_FILE)
 

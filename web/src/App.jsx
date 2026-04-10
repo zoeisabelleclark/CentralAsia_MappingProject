@@ -9,6 +9,11 @@ const panelStyle = {
     boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
 };
 
+const COUNTRIES = [
+    { value: "kazakhstan", label: "Kazakhstan" },
+    { value: "kyrgyzstan", label: "Kyrgyzstan" },
+];
+
 const sectionTitleStyle = {
     fontSize: "0.82rem",
     fontWeight: 700,
@@ -46,16 +51,24 @@ export default function App() {
     const [viewMode, setViewMode] = useState("ethnicity");
     const [selectedRegion, setSelectedRegion] = useState(null);
     const [activePanel, setActivePanel] = useState("map");
+    const [selectedCountry, setSelectedCountry] = useState("kazakhstan");
+    const countryLabel = COUNTRIES.find((c) => c.value === selectedCountry)?.label || selectedCountry;
 
     useEffect(() => {
-        fetch("/data/regions.geojson")
+        setRegions(null);
+        setEthnicityStats([]);
+        setSelectedEthnicity("dominant");
+        setSelectedRegion(null);
+
+
+        fetch(`/data/${selectedCountry}/regions.geojson`)
             .then((res) => res.json())
             .then((data) => setRegions(data));
 
-        fetch("/data/ethnicity_stats.json")
+        fetch(`/data/${selectedCountry}/ethnicity_stats.json`)
             .then((res) => res.json())
             .then((data) => setEthnicityStats(data));
-    }, []);
+    }, [selectedCountry]);
 
     const ethnicityOptions = useMemo(() => {
         const values = [...new Set(ethnicityStats.map((d) => d.ethnicity).filter(Boolean))];
@@ -76,8 +89,9 @@ export default function App() {
             style={{
                 display: "grid",
                 gridTemplateColumns: "360px 1fr",
-                minHeight: "100vh",
+                height: "100vh",
                 background: "#f7f7f5",
+                overflow: "hidden",
             }}
         >
             <aside
@@ -85,6 +99,8 @@ export default function App() {
                     padding: "1.25rem",
                     borderRight: "1px solid #e5e7eb",
                     background: "#f3f4f1",
+                    overflowY: "auto",
+                    height: "100vh",
                 }}
             >
                 <div style={{ marginBottom: "1.25rem" }}>
@@ -92,7 +108,7 @@ export default function App() {
                         Central Asia Mapping Project
                     </div>
                     <h1 style={{ margin: 0, fontSize: "1.6rem", lineHeight: 1.1 }}>
-                        Kazakhstan Ethnicity Explorer
+                        {countryLabel} Ethnicity Explorer
                     </h1>
                 </div>
 
@@ -106,6 +122,23 @@ export default function App() {
                     >
                         Methodology
                     </button>
+                </div>
+
+                <div style={{ marginBottom: "1rem" }}>
+                    <label style={{ display: "block", fontWeight: 600, marginBottom: "0.45rem" }}>
+                        Country
+                    </label>
+                    <select
+                        value={selectedCountry}
+                        onChange={(e) => setSelectedCountry(e.target.value)}
+                        style={controlStyle}
+                    >
+                        {COUNTRIES.map((country) => (
+                            <option key={country.value} value={country.value}>
+                                {country.label}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 {activePanel === "map" ? (
@@ -213,10 +246,15 @@ export default function App() {
                 )}
             </aside>
 
-            <main style={{ minWidth: 0 }}>
+            <main style={{
+                minWidth: 0,
+                height: "100vh",
+                overflow: "hidden",
+            }}>
                 {activePanel === "map" ? (
                     regions && (
                         <MapView
+                            key={selectedCountry}
                             regions={regions}
                             ethnicityStats={ethnicityStats}
                             selectedEthnicity={selectedEthnicity}

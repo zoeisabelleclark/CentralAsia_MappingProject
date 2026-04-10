@@ -31,6 +31,19 @@ where p_i is the share of each ethnic group in the region.
 - Ethnicity should not be interpreted as a direct substitute for language use.
 
 
+## Add new country
+- find geojson map file 
+- find census data 
+- run inspect boundaries and find name column 
+- change prepare boundaries script to be accurate 
+- run prepare boundaries script 
+
+- census reshaping
+- crosswalk 
+- clean join 
+- processed outputs
+
+
 ## Update process
 - Update join_boundaries.py
 - rerun: python scripts/join_boundaries.py

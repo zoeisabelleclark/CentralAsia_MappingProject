@@ -9,6 +9,11 @@ const panelStyle = {
     boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
 };
 
+const COUNTRIES = [
+    { value: "kazakhstan", label: "Kazakhstan" },
+    { value: "kyrgyzstan", label: "Kyrgyzstan" },
+];
+
 const sectionTitleStyle = {
     fontSize: "0.82rem",
     fontWeight: 700,
@@ -47,7 +52,7 @@ export default function App() {
     const [selectedRegion, setSelectedRegion] = useState(null);
     const [activePanel, setActivePanel] = useState("map");
     const [selectedCountry, setSelectedCountry] = useState("kazakhstan");
-    const countryLabel = selectedCountry === "kazakhstan" ? "Kazakhstan" : "Kyrgyzstan";
+    const countryLabel = COUNTRIES.find((c) => c.value === selectedCountry)?.label || selectedCountry;
 
     useEffect(() => {
         setRegions(null);
@@ -84,8 +89,9 @@ export default function App() {
             style={{
                 display: "grid",
                 gridTemplateColumns: "360px 1fr",
-                minHeight: "100vh",
+                height: "100vh",
                 background: "#f7f7f5",
+                overflow: "hidden",
             }}
         >
             <aside
@@ -93,6 +99,8 @@ export default function App() {
                     padding: "1.25rem",
                     borderRight: "1px solid #e5e7eb",
                     background: "#f3f4f1",
+                    overflowY: "auto",
+                    height: "100vh",
                 }}
             >
                 <div style={{ marginBottom: "1.25rem" }}>
@@ -125,8 +133,11 @@ export default function App() {
                         onChange={(e) => setSelectedCountry(e.target.value)}
                         style={controlStyle}
                     >
-                        <option value="kazakhstan">Kazakhstan</option>
-                        <option value="kyrgyzstan">Kyrgyzstan</option>
+                        {COUNTRIES.map((country) => (
+                            <option key={country.value} value={country.value}>
+                                {country.label}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
@@ -235,10 +246,15 @@ export default function App() {
                 )}
             </aside>
 
-            <main style={{ minWidth: 0 }}>
+            <main style={{
+                minWidth: 0,
+                height: "100vh",
+                overflow: "hidden",
+            }}>
                 {activePanel === "map" ? (
                     regions && (
                         <MapView
+                            key={selectedCountry}
                             regions={regions}
                             ethnicityStats={ethnicityStats}
                             selectedEthnicity={selectedEthnicity}

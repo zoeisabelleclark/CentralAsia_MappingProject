@@ -232,7 +232,7 @@ export default function MapView({
     }
 
     return (
-        <div style={{ position: "relative", height: "100vh", width: "100%" }}>
+        <div style={{ position: "relative", height: "100%", width: "100%" }}>
             <MapContainer
                 center={[48, 68]}
                 zoom={5}

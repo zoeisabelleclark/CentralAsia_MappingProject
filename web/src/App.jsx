@@ -345,8 +345,28 @@ export default function App() {
                         />
                     )
                 ) : (
-                    <div style={{ padding: "2rem" }}>
-                        <div style={{ ...panelStyle, padding: "1.5rem", maxWidth: "900px" }}>
+                    <div
+                        style={{
+                            height: "100%",
+                            overflowY: "auto",
+                            padding: "2rem",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "flex-start",
+                            WebkitOverflowScrolling: "touch",
+                        }}
+                    >
+                        <div
+                            style={{
+                                background: "rgba(255,255,255,0.92)",
+                                border: "1px solid #e5e7eb",
+                                borderRadius: "16px",
+                                boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
+                                padding: "1.5rem",
+                                maxWidth: "900px",
+                                width: "100%",
+                            }}
+                        >
                             <Methodology />
                         </div>
                     </div>

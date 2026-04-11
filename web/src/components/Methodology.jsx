@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Methodology() {
     return (
-        <div style={{ padding: "1rem", lineHeight: 1.6 }}>
+        <div style={{ padding: "1rem", lineHeight: 1.6, paddingBottom: "2rem" }}>
             <h2>Methodology</h2>
 
             <p>

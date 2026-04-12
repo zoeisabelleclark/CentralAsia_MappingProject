@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import MapView from "./components/MapView";
 import Methodology from "./components/Methodology";
+import SidebarFooter from "./components/SidebarFooter";
 
 const panelStyle = {
     background: "rgba(255,255,255,0.88)",
@@ -145,7 +146,7 @@ export default function App() {
                         Central Asia Mapping Project
                     </div>
                     <h1 style={{ margin: 0, fontSize: "1.6rem", lineHeight: 1.1 }}>
-                        {countryLabel} Explorer
+                        Central Asia Explorer
                     </h1>
                 </div>
 
@@ -321,6 +322,16 @@ export default function App() {
                         Use the Methodology tab to view project notes in the main panel.
                     </div>
                 )}
+                {/* Footer */}
+                <div
+                    style={{
+                        padding: "0.9rem 1.25rem",
+                        borderTop: "1px solid #e5e7eb",
+                        background: "#f3f4f1",
+                    }}
+                >
+                    <SidebarFooter />
+                </div>
             </aside>
 
             <main

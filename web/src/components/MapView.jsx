@@ -11,6 +11,14 @@ function getPercentColor(value) {
     return "#cbd5e1";
 }
 
+function getUrbanColor(value) {
+    if (value > 80) return "#0f172a";
+    if (value > 60) return "#334155";
+    if (value > 40) return "#64748b";
+    if (value > 20) return "#94a3b8";
+    return "#cbd5e1";
+}
+
 function getDiversityColor(value) {
     if (value > 1.2) return "#0f172a";
     if (value > 1.0) return "#334155";
@@ -44,22 +52,41 @@ function LegendRow({ color, label }) {
 }
 
 function Legend({ viewMode, selectedEthnicity }) {
-    const rows =
-        viewMode === "diversity"
-            ? [
-                { color: "#0f172a", label: "1.2+" },
-                { color: "#334155", label: "1.0–1.2" },
-                { color: "#64748b", label: "0.8–1.0" },
-                { color: "#94a3b8", label: "0.5–0.8" },
-                { color: "#cbd5e1", label: "< 0.5" },
-            ]
-            : [
-                { color: "#0f172a", label: "75%+" },
-                { color: "#334155", label: "50–75%" },
-                { color: "#64748b", label: "25–50%" },
-                { color: "#94a3b8", label: "10–25%" },
-                { color: "#cbd5e1", label: "< 10%" },
-            ];
+    let title = "";
+    let rows = [];
+
+    if (viewMode === "diversity") {
+        title = "Shannon diversity index";
+        rows = [
+            { color: "#0f172a", label: "1.2+" },
+            { color: "#334155", label: "1.0–1.2" },
+            { color: "#64748b", label: "0.8–1.0" },
+            { color: "#94a3b8", label: "0.5–0.8" },
+            { color: "#cbd5e1", label: "< 0.5" },
+        ];
+    } else if (viewMode === "urban") {
+        title = "Urban population share";
+        rows = [
+            { color: "#0f172a", label: "80%+" },
+            { color: "#334155", label: "60–80%" },
+            { color: "#64748b", label: "40–60%" },
+            { color: "#94a3b8", label: "20–40%" },
+            { color: "#cbd5e1", label: "< 20%" },
+        ];
+    } else {
+        title =
+            selectedEthnicity === "dominant"
+                ? "Dominant ethnicity share"
+                : `${selectedEthnicity} share`;
+
+        rows = [
+            { color: "#0f172a", label: "75%+" },
+            { color: "#334155", label: "50–75%" },
+            { color: "#64748b", label: "25–50%" },
+            { color: "#94a3b8", label: "10–25%" },
+            { color: "#cbd5e1", label: "< 10%" },
+        ];
+    }
 
     return (
         <div
@@ -91,11 +118,7 @@ function Legend({ viewMode, selectedEthnicity }) {
             </div>
 
             <div style={{ fontWeight: 700, marginBottom: "0.75rem", lineHeight: 1.3 }}>
-                {viewMode === "diversity"
-                    ? "Shannon diversity index"
-                    : selectedEthnicity === "dominant"
-                        ? "Dominant ethnicity share"
-                        : `${selectedEthnicity} share`}
+                {title}
             </div>
 
             <div style={{ display: "grid", gap: "0.45rem" }}>
@@ -109,7 +132,8 @@ function Legend({ viewMode, selectedEthnicity }) {
 
 export default function MapView({
     regions,
-    ethnicityStats,
+    statsData,
+    statsType,
     selectedEthnicity,
     viewMode,
     onSelectRegion,
@@ -118,8 +142,10 @@ export default function MapView({
     const geoJsonRef = useRef(null);
 
     const ethnicityLookup = useMemo(() => {
+        if (statsType !== "ethnicity") return {};
+
         const lookup = {};
-        for (const row of ethnicityStats) {
+        for (const row of statsData) {
             const regionKey = row.region_key;
             const ethnicity = row.ethnicity;
             const percent = Number(row.percent);
@@ -127,8 +153,9 @@ export default function MapView({
             if (!lookup[regionKey]) lookup[regionKey] = {};
             lookup[regionKey][ethnicity] = percent;
         }
+
         return lookup;
-    }, [ethnicityStats]);
+    }, [statsData, statsType]);
 
     function getFeatureValue(feature) {
         const props = feature.properties || {};
@@ -136,6 +163,10 @@ export default function MapView({
 
         if (viewMode === "diversity") {
             return Number(props.diversity_index || 0);
+        }
+
+        if (viewMode === "urban") {
+            return Number(props.urban_percent || 0);
         }
 
         if (selectedEthnicity === "dominant") {
@@ -150,8 +181,18 @@ export default function MapView({
         const isSelected = selectedRegion?.region_key === props.region_key;
         const value = getFeatureValue(feature);
 
+        let fillColor = "#cbd5e1";
+
+        if (viewMode === "diversity") {
+            fillColor = getDiversityColor(value);
+        } else if (viewMode === "urban") {
+            fillColor = getUrbanColor(value);
+        } else {
+            fillColor = getPercentColor(value);
+        }
+
         return {
-            fillColor: viewMode === "diversity" ? getDiversityColor(value) : getPercentColor(value),
+            fillColor,
             weight: isSelected ? 3 : 1.2,
             opacity: 1,
             color: isSelected ? "#111827" : "#ffffff",
@@ -168,7 +209,7 @@ export default function MapView({
             ...base,
             weight: isSelected ? 3 : 2.2,
             color: "#111827",
-            fillColor: base.fillColor,   // keep data color unchanged
+            fillColor: base.fillColor,
             fillOpacity: base.fillOpacity,
         };
     }
@@ -208,6 +249,13 @@ export default function MapView({
         if (viewMode === "diversity") {
             body = `Diversity index: ${props.diversity_index != null ? Number(props.diversity_index).toFixed(3) : "n/a"
                 }`;
+        } else if (viewMode === "urban") {
+            body = `
+        Urban share: ${props.urban_percent != null ? Number(props.urban_percent).toFixed(1) + "%" : "n/a"
+                }<br/>
+        Rural share: ${props.rural_percent != null ? Number(props.rural_percent).toFixed(1) + "%" : "n/a"
+                }
+      `;
         } else if (selectedEthnicity === "dominant") {
             body = `Dominant ethnicity: ${props.dominant_ethnicity || "n/a"}<br/>
               Share: ${props.dominant_percent != null
@@ -234,7 +282,7 @@ export default function MapView({
     return (
         <div style={{ position: "relative", height: "100%", width: "100%" }}>
             <MapContainer
-                center={[48, 68]}
+                center={[43, 64]}
                 zoom={5}
                 scrollWheelZoom={true}
                 style={{ height: "100%", width: "100%" }}

@@ -43,28 +43,30 @@ const tabButton = (active) => ({
 const COUNTRY_CONFIG = {
     kazakhstan: {
         label: "Kazakhstan",
-        statsFile: "ethnicity_stats.json",
-        statsType: "ethnicity",
+        hasEthnicity: true,
+        hasUrban: true,
         layers: [
             { value: "ethnicity", label: "Ethnicity share" },
             { value: "diversity", label: "Diversity index" },
+            { value: "urban", label: "Urban share" },
         ],
         defaultLayer: "ethnicity",
     },
     kyrgyzstan: {
         label: "Kyrgyzstan",
-        statsFile: "ethnicity_stats.json",
-        statsType: "ethnicity",
+        hasEthnicity: true,
+        hasUrban: true,
         layers: [
             { value: "ethnicity", label: "Ethnicity share" },
             { value: "diversity", label: "Diversity index" },
+            { value: "urban", label: "Urban share" },
         ],
         defaultLayer: "ethnicity",
     },
     uzbekistan: {
         label: "Uzbekistan",
-        statsFile: "urban_stats.json",
-        statsType: "urban",
+        hasEthnicity: false,
+        hasUrban: true,
         layers: [
             { value: "urban", label: "Urban share" },
         ],
@@ -74,31 +76,40 @@ const COUNTRY_CONFIG = {
 
 export default function App() {
     const [regions, setRegions] = useState(null);
-    const [statsData, setStatsData] = useState([]);
+    const [ethnicityStats, setEthnicityStats] = useState([]);
+    const [urbanStats, setUrbanStats] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState("kazakhstan");
     const [selectedEthnicity, setSelectedEthnicity] = useState("dominant");
     const [viewMode, setViewMode] = useState("ethnicity");
     const [selectedRegion, setSelectedRegion] = useState(null);
     const [activePanel, setActivePanel] = useState("map");
-
     const countryConfig = COUNTRY_CONFIG[selectedCountry];
     const countryLabel = countryConfig.label;
     const availableLayers = countryConfig.layers;
-    const statsType = countryConfig.statsType;
+
 
     useEffect(() => {
         setRegions(null);
-        setStatsData([]);
+        setEthnicityStats([]);
+        setUrbanStats([]);
         setSelectedRegion(null);
 
         fetch(`/data/${selectedCountry}/regions.geojson`)
             .then((res) => res.json())
             .then((data) => setRegions(data));
 
-        fetch(`/data/${selectedCountry}/${countryConfig.statsFile}`)
-            .then((res) => res.json())
-            .then((data) => setStatsData(data));
-    }, [selectedCountry, countryConfig.statsFile]);
+        if (countryConfig.hasEthnicity) {
+            fetch(`/data/${selectedCountry}/ethnicity_stats.json`)
+                .then((res) => res.json())
+                .then((data) => setEthnicityStats(data));
+        }
+
+        if (countryConfig.hasUrban) {
+            fetch(`/data/${selectedCountry}/urban_stats.json`)
+                .then((res) => res.json())
+                .then((data) => setUrbanStats(data));
+        }
+    }, [selectedCountry, countryConfig.hasEthnicity, countryConfig.hasUrban]);
 
     useEffect(() => {
         setViewMode(countryConfig.defaultLayer);
@@ -107,19 +118,19 @@ export default function App() {
     }, [selectedCountry, countryConfig.defaultLayer]);
 
     const ethnicityOptions = useMemo(() => {
-        if (statsType !== "ethnicity") return [];
-        const values = [...new Set(statsData.map((d) => d.ethnicity).filter(Boolean))];
+        if (!countryConfig.hasEthnicity) return [];
+        const values = [...new Set(ethnicityStats.map((d) => d.ethnicity).filter(Boolean))];
         return values.sort();
-    }, [statsData, statsType]);
+    }, [ethnicityStats, countryConfig.hasEthnicity]);
 
     const selectedRegionBreakdown = useMemo(() => {
-        if (!selectedRegion || statsType !== "ethnicity") return [];
+        if (!selectedRegion || !countryConfig.hasEthnicity) return [];
 
-        return statsData
+        return ethnicityStats
             .filter((row) => row.region_key === selectedRegion.region_key)
             .sort((a, b) => Number(b.percent) - Number(a.percent))
             .slice(0, 8);
-    }, [selectedRegion, statsData, statsType]);
+    }, [selectedRegion, ethnicityStats, countryConfig.hasEthnicity]);
 
     return (
         <div
@@ -201,7 +212,7 @@ export default function App() {
                                 </select>
                             </div>
 
-                            {statsType === "ethnicity" && viewMode === "ethnicity" && (
+                            {countryConfig.hasEthnicity && viewMode === "ethnicity" && (
                                 <div>
                                     <label style={{ display: "block", fontWeight: 600, marginBottom: "0.45rem" }}>
                                         Ethnicity
@@ -231,7 +242,7 @@ export default function App() {
                                         {selectedRegion.region_name}
                                     </div>
 
-                                    {statsType === "ethnicity" ? (
+                                    {viewMode === "ethnicity" || viewMode === "diversity" ? (
                                         <>
                                             <div style={{ display: "grid", gap: "0.55rem", color: "#374151" }}>
                                                 <div>
@@ -346,8 +357,8 @@ export default function App() {
                         <MapView
                             key={selectedCountry}
                             regions={regions}
-                            statsData={statsData}
-                            statsType={statsType}
+                            ethnicityStats={ethnicityStats}
+                            urbanStats={urbanStats}
                             selectedEthnicity={selectedEthnicity}
                             viewMode={viewMode}
                             onSelectRegion={setSelectedRegion}

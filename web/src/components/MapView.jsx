@@ -132,8 +132,8 @@ function Legend({ viewMode, selectedEthnicity }) {
 
 export default function MapView({
     regions,
-    statsData,
-    statsType,
+    ethnicityStats,
+    urbanStats,
     selectedEthnicity,
     viewMode,
     onSelectRegion,
@@ -142,10 +142,8 @@ export default function MapView({
     const geoJsonRef = useRef(null);
 
     const ethnicityLookup = useMemo(() => {
-        if (statsType !== "ethnicity") return {};
-
         const lookup = {};
-        for (const row of statsData) {
+        for (const row of ethnicityStats) {
             const regionKey = row.region_key;
             const ethnicity = row.ethnicity;
             const percent = Number(row.percent);
@@ -153,9 +151,8 @@ export default function MapView({
             if (!lookup[regionKey]) lookup[regionKey] = {};
             lookup[regionKey][ethnicity] = percent;
         }
-
         return lookup;
-    }, [statsData, statsType]);
+    }, [ethnicityStats]);
 
     function getFeatureValue(feature) {
         const props = feature.properties || {};

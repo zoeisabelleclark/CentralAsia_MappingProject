@@ -11,13 +11,13 @@ export default function Methodology() {
             </p>
             <h3>Data sources</h3>
             <p>
-                <b>Kazakhstan</b>: March 2026 regional ethnicity counts from <a href="https://stat.gov.kz/en/industries/social-statistics/demography/spreadsheets/?year=&name=38041&period=&type=">the Kazakh bureau of national statistics</a> and
+                <b>Kazakhstan</b>: March 2026 regional ethnicity counts and 2025 rural/urban populations from <a href="https://stat.gov.kz/en/industries/social-statistics/demography/spreadsheets/?year=&name=38041&period=&type=">the Kazakh bureau of national statistics</a>  and
                 Level-1 administrative boundaries in GeoJSON format from <a href="https://simplemaps.com/gis/country/kz">Simple Maps</a>
             </p>
 
 
             <p>
-                <b>Kyrgyzstan</b>: 2020-2024 regional ethnicity counts from the appendix of the <a href="https://www.stat.gov.kg/ru/publications/demograficheskij-ezhegodnik-kyrgyzskoj-respubliki/">2025 demographic yearbook</a> and Level-1 administrative boundaries in GeoJSON format from <a href="https://simplemaps.com/gis/country/kg">Simple Maps</a>
+                <b>Kyrgyzstan</b>: 2020-2024 regional ethnicity counts and rural/urban population from the appendix of the <a href="https://www.stat.gov.kg/ru/publications/demograficheskij-ezhegodnik-kyrgyzskoj-respubliki/">2025 demographic yearbook</a> and Level-1 administrative boundaries in GeoJSON format from <a href="https://simplemaps.com/gis/country/kg">Simple Maps</a>
             </p>
 
 

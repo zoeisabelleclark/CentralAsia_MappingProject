@@ -3,8 +3,8 @@ import math
 import pandas as pd
 import geopandas as gpd
 
-INTERIM = Path("data/interim")
-OUT = Path("data/processed")
+INTERIM = Path("data/interim/kazakhstan")
+OUT = Path("data/processed/kazakhstan")
 OUT.mkdir(parents=True, exist_ok=True)
 
 def shannon_diversity(group: pd.DataFrame) -> float:
@@ -14,58 +14,75 @@ def shannon_diversity(group: pd.DataFrame) -> float:
 
     proportions = group["population"] / total
     proportions = proportions[proportions > 0]
-
     return -sum(p * math.log(p) for p in proportions)
 
 def main():
-    stats = pd.read_csv(INTERIM / "census_clean.csv")
+    # Load ethnicity + urban data
+    ethnicity = pd.read_csv(INTERIM / "census_clean.csv")
+    urban = pd.read_csv(INTERIM / "urban_rural_clean.csv")
     regions = gpd.read_file(INTERIM / "kazakhstan_regions.json")
 
-    stats["region_key"] = stats["region_key"].astype(str).str.strip()
-    stats["ethnicity"] = stats["ethnicity"].astype(str).str.strip()
-    stats["population"] = pd.to_numeric(stats["population"], errors="coerce")
+    # Clean ethnicity fields
+    ethnicity["region_key"] = ethnicity["region_key"].astype(str).str.strip()
+    ethnicity["ethnicity"] = ethnicity["ethnicity"].astype(str).str.strip()
+    ethnicity["population"] = pd.to_numeric(ethnicity["population"], errors="coerce")
+    ethnicity = ethnicity.dropna(subset=["population"])
 
-    stats = stats.dropna(subset=["population"])
+    # Recompute totals + percent safely
+    totals = (
+        ethnicity.groupby("region_key", as_index=False)["population"]
+        .sum()
+        .rename(columns={"population": "region_total_population"})
+    )
+    ethnicity = ethnicity.merge(totals, on="region_key", how="left")
+    ethnicity["percent"] = ethnicity["population"] / ethnicity["region_total_population"] * 100
 
+    # Dominant ethnicity
+    idx = ethnicity.groupby("region_key")["population"].idxmax()
+    dominant = ethnicity.loc[idx, ["region_key", "ethnicity", "population", "percent"]].copy()
+    dominant = dominant.rename(columns={
+        "ethnicity": "dominant_ethnicity",
+        "population": "dominant_population",
+        "percent": "dominant_percent",
+    })
+
+    # Diversity
+    diversity = (
+        ethnicity.groupby("region_key")
+        .apply(shannon_diversity, include_groups=False)
+        .reset_index(name="diversity_index")
+    )
+
+    ethnicity_summary = dominant.merge(totals, on="region_key", how="left")
+    ethnicity_summary = ethnicity_summary.merge(diversity, on="region_key", how="left")
+
+    # Clean urban fields
+    urban["region_key"] = urban["region_key"].astype(str).str.strip()
+    for col in ["urban_population", "rural_population", "total_population", "urban_percent", "rural_percent"]:
+        if col in urban.columns:
+            urban[col] = pd.to_numeric(urban[col], errors="coerce")
+
+    urban_summary = urban[
+        ["region_key", "urban_population", "rural_population", "total_population", "urban_percent", "rural_percent"]
+    ].copy()
+
+    # Clean boundary fields
     regions["region_key"] = regions["region_key"].astype(str).str.strip()
     if "region_name" in regions.columns:
         regions["region_name"] = regions["region_name"].astype(str).str.strip()
 
-    totals = (
-        stats.groupby("region_key", as_index=False)["population"]
-        .sum()
-        .rename(columns={"population": "region_total_population"})
-    )
+    # Merge everything onto boundaries
+    merged = regions.merge(ethnicity_summary, on="region_key", how="left")
+    merged = merged.merge(urban_summary, on="region_key", how="left")
 
-    stats = stats.merge(totals, on="region_key", how="left")
-    stats["percent"] = stats["population"] / stats["region_total_population"] * 100
-
-    idx = stats.groupby("region_key")["population"].idxmax()
-    dominant = stats.loc[idx, ["region_key", "ethnicity", "population", "percent"]].copy()
-    dominant = dominant.rename(columns={
-        "ethnicity": "dominant_ethnicity",
-        "population": "dominant_population",
-        "percent": "dominant_percent"
-    })
-
-    diversity = (
-        stats.groupby("region_key", as_index=False)
-        .apply(shannon_diversity, include_groups=False)
-        .reset_index()
-    )
-    diversity.columns = ["index", "region_key", "diversity_index"]
-    diversity = diversity[["region_key", "diversity_index"]]
-
-    summary = dominant.merge(totals, on="region_key", how="left")
-    summary = summary.merge(diversity, on="region_key", how="left")
-
-    merged = regions.merge(summary, on="region_key", how="left")
-
+    # Write outputs
     merged.to_file(OUT / "regions.geojson", driver="GeoJSON")
-    stats.to_json(OUT / "ethnicity_stats.json", orient="records", force_ascii=False)
+    ethnicity.to_json(OUT / "ethnicity_stats.json", orient="records", force_ascii=False)
+    urban.to_json(OUT / "urban_stats.json", orient="records", force_ascii=False)
 
-    print("Wrote data/processed/regions.geojson")
-    print("Wrote data/processed/ethnicity_stats.json")
+    print("Wrote data/processed/kazakhstan/regions.geojson")
+    print("Wrote data/processed/kazakhstan/ethnicity_stats.json")
+    print("Wrote data/processed/kazakhstan/urban_stats.json")
 
 if __name__ == "__main__":
     main()

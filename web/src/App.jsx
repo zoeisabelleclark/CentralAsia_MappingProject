@@ -143,10 +143,10 @@ export default function App() {
             >
                 <div style={{ marginBottom: "1.25rem" }}>
                     <div style={{ fontSize: "0.82rem", color: "#6b7280", marginBottom: "0.3rem" }}>
-                        Central Asia Mapping Project
+                        Mapping project
                     </div>
                     <h1 style={{ margin: 0, fontSize: "1.6rem", lineHeight: 1.1 }}>
-                        Central Asia Explorer
+                        Central Asia Atlas
                     </h1>
                 </div>
 

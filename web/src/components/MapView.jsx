@@ -19,6 +19,14 @@ function getUrbanColor(value) {
     return "#cbd5e1";
 }
 
+function getDensityColor(value) {
+    if (value > 200) return "#0f172a";
+    if (value > 100) return "#334155";
+    if (value > 50) return "#64748b";
+    if (value > 20) return "#94a3b8";
+    return "#cbd5e1";
+}
+
 function getDiversityColor(value) {
     if (value > 1.2) return "#0f172a";
     if (value > 1.0) return "#334155";
@@ -26,6 +34,8 @@ function getDiversityColor(value) {
     if (value > 0.5) return "#94a3b8";
     return "#cbd5e1";
 }
+
+
 
 function LegendRow({ color, label }) {
     return (
@@ -72,6 +82,15 @@ function Legend({ viewMode, selectedEthnicity }) {
             { color: "#64748b", label: "40–60%" },
             { color: "#94a3b8", label: "20–40%" },
             { color: "#cbd5e1", label: "< 20%" },
+        ];
+    } else if (viewMode === "density") {
+        title = "Population density (people/km²)";
+        rows = [
+            { color: "#0f172a", label: "200+" },
+            { color: "#334155", label: "100–200" },
+            { color: "#64748b", label: "50–100" },
+            { color: "#94a3b8", label: "20–50" },
+            { color: "#cbd5e1", label: "< 20" },
         ];
     } else {
         title =
@@ -179,6 +198,10 @@ export default function MapView({
             return Number(props.diversity_index || 0);
         }
 
+        if (viewMode === "density") {
+            return Number(props.population_density || 0);
+        }
+
         if (viewMode === "urban") {
             return Number(props.urban_percent || 0);
         }
@@ -201,6 +224,8 @@ export default function MapView({
             fillColor = getDiversityColor(value);
         } else if (viewMode === "urban") {
             fillColor = getUrbanColor(value);
+        } else if (viewMode === "density") {
+            fillColor = getDensityColor(value);
         } else {
             fillColor = getPercentColor(value);
         }
@@ -274,6 +299,11 @@ export default function MapView({
             body = `Dominant ethnicity: ${props.dominant_ethnicity || "n/a"}<br/>
               Share: ${props.dominant_percent != null
                     ? Number(props.dominant_percent).toFixed(1) + "%"
+                    : "n/a"
+                }`;
+        } else if (viewMode === "density") {
+            body = `Population density: ${props.population_density != null
+                    ? Number(props.population_density).toFixed(1) + " people/km²"
                     : "n/a"
                 }`;
         } else {

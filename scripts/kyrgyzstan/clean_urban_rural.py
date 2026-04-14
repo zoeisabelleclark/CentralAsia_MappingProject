@@ -16,6 +16,12 @@ def main():
     crosswalk["source_region_name"] = crosswalk["source_region_name"].astype(str).str.strip()
     crosswalk["region_key"] = crosswalk["region_key"].astype(str).str.strip()
 
+    POPULATION_MULTIPLIER = 1000
+
+    for col in ["urban_population", "rural_population", "total_population"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce") * POPULATION_MULTIPLIER
+
     for col in ["urban_population", "rural_population", "total_population", "urban_percent", "rural_percent"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")

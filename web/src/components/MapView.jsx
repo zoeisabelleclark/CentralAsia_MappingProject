@@ -1,6 +1,6 @@
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import L from "leaflet";
-import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 function getPercentColor(value) {
@@ -128,6 +128,23 @@ function Legend({ viewMode, selectedEthnicity }) {
             </div>
         </div>
     );
+}
+
+function FitToData({ regions }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!regions || !regions.features || regions.features.length === 0) return;
+
+        const layer = L.geoJSON(regions);
+        const bounds = layer.getBounds();
+
+        if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [20, 20] });
+        }
+    }, [regions, map]);
+
+    return null;
 }
 
 export default function MapView({
@@ -284,6 +301,7 @@ export default function MapView({
                 scrollWheelZoom={true}
                 style={{ height: "100%", width: "100%" }}
             >
+                <FitToData regions={regions} />
                 <TileLayer
                     attribution="&copy; OpenStreetMap contributors"
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

@@ -41,6 +41,15 @@ const tabButton = (active) => ({
 });
 
 const COUNTRY_CONFIG = {
+    central_asia: {
+        label: "Central Asia",
+        hasEthnicity: false,
+        hasUrban: true,
+        layers: [
+            { value: "urban", label: "Urban share" },
+        ],
+        defaultLayer: "urban",
+    },
     kazakhstan: {
         label: "Kazakhstan",
         hasEthnicity: true,
@@ -50,7 +59,7 @@ const COUNTRY_CONFIG = {
             { value: "diversity", label: "Diversity index" },
             { value: "urban", label: "Urban share" },
         ],
-        defaultLayer: "ethnicity",
+        defaultLayer: "urban",
     },
     kyrgyzstan: {
         label: "Kyrgyzstan",
@@ -61,7 +70,7 @@ const COUNTRY_CONFIG = {
             { value: "diversity", label: "Diversity index" },
             { value: "urban", label: "Urban share" },
         ],
-        defaultLayer: "ethnicity",
+        defaultLayer: "urban",
     },
     uzbekistan: {
         label: "Uzbekistan",
@@ -96,7 +105,7 @@ export default function App() {
     const [regions, setRegions] = useState(null);
     const [ethnicityStats, setEthnicityStats] = useState([]);
     const [urbanStats, setUrbanStats] = useState([]);
-    const [selectedCountry, setSelectedCountry] = useState("kazakhstan");
+    const [selectedCountry, setSelectedCountry] = useState("central_asia");
     const [selectedEthnicity, setSelectedEthnicity] = useState("dominant");
     const [viewMode, setViewMode] = useState("ethnicity");
     const [selectedRegion, setSelectedRegion] = useState(null);
@@ -306,6 +315,10 @@ export default function App() {
                                         </>
                                     ) : (
                                         <div style={{ display: "grid", gap: "0.55rem", color: "#374151" }}>
+                                            <div>
+                                                <strong>Country:</strong>{" "}
+                                                {selectedRegion.country || "n/a"}
+                                            </div>
                                             <div>
                                                 <strong>Urban share:</strong>{" "}
                                                 {selectedRegion.urban_percent != null

@@ -45,8 +45,10 @@ const COUNTRY_CONFIG = {
         label: "Central Asia",
         hasEthnicity: false,
         hasUrban: true,
+        hasDensity: true,
         layers: [
             { value: "urban", label: "Urban share" },
+            { value: "density", label: "Population density" },
         ],
         defaultLayer: "urban",
     },
@@ -54,10 +56,12 @@ const COUNTRY_CONFIG = {
         label: "Kazakhstan",
         hasEthnicity: true,
         hasUrban: true,
+        hasDensity: true,
         layers: [
             { value: "ethnicity", label: "Ethnicity share" },
             { value: "diversity", label: "Diversity index" },
             { value: "urban", label: "Urban share" },
+            { value: "density", label: "Population density" },
         ],
         defaultLayer: "urban",
     },
@@ -65,10 +69,12 @@ const COUNTRY_CONFIG = {
         label: "Kyrgyzstan",
         hasEthnicity: true,
         hasUrban: true,
+        hasDensity: true,
         layers: [
             { value: "ethnicity", label: "Ethnicity share" },
             { value: "diversity", label: "Diversity index" },
             { value: "urban", label: "Urban share" },
+            { value: "density", label: "Population density" },
         ],
         defaultLayer: "urban",
     },
@@ -76,8 +82,10 @@ const COUNTRY_CONFIG = {
         label: "Uzbekistan",
         hasEthnicity: false,
         hasUrban: true,
+        hasDensity: true,
         layers: [
             { value: "urban", label: "Urban share" },
+            { value: "density", label: "Population density" },
         ],
         defaultLayer: "urban",
     },
@@ -85,8 +93,10 @@ const COUNTRY_CONFIG = {
         label: "Tajikistan",
         hasEthnicity: false,
         hasUrban: true,
+        hasDensity: true,
         layers: [
             { value: "urban", label: "Urban share" },
+            { value: "density", label: "Population density" },
         ],
         defaultLayer: "urban",
     },
@@ -94,8 +104,10 @@ const COUNTRY_CONFIG = {
         label: "Turkmenistan",
         hasEthnicity: false,
         hasUrban: true,
+        hasDensity: true,
         layers: [
             { value: "urban", label: "Urban share" },
+            { value: "density", label: "Population density" },
         ],
         defaultLayer: "urban",
     },
@@ -347,6 +359,18 @@ export default function App() {
                                                 <strong>Total population:</strong>{" "}
                                                 {selectedRegion.total_population != null
                                                     ? Number(selectedRegion.total_population).toLocaleString()
+                                                    : "n/a"}
+                                            </div>
+                                            <div>
+                                                <strong>Population density:</strong>{" "}
+                                                {selectedRegion.population_density != null
+                                                    ? `${Number(selectedRegion.population_density).toFixed(1)} people/km²`
+                                                    : "n/a"}
+                                            </div>
+                                            <div>
+                                                <strong>Area:</strong>{" "}
+                                                {selectedRegion.area_sq_km != null
+                                                    ? `${Number(selectedRegion.area_sq_km).toFixed(0)} km²`
                                                     : "n/a"}
                                             </div>
                                         </div>

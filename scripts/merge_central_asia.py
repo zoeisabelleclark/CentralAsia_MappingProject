@@ -26,7 +26,6 @@ def main():
         stats = pd.read_json(stats_path)
 
 
-        # Keep a shared, predictable schema
         keep_geo_cols = [
             c for c in [
                 "country",
@@ -37,6 +36,8 @@ def main():
                 "total_population",
                 "urban_percent",
                 "rural_percent",
+                "area_sq_km",
+                "population_density",
                 "geometry",
             ]
             if c in gdf.columns

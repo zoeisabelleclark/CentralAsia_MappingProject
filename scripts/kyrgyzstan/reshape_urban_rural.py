@@ -9,6 +9,8 @@ def clean_number(val):
     if pd.isna(val):
         return None
     val = str(val).strip().replace(",", "").replace(" ", "")
+    if val == "":
+        return None
     return pd.to_numeric(val, errors="coerce")
 
 def main():
@@ -29,22 +31,39 @@ def main():
     for col in ["total_population", "urban_population", "rural_population"]:
         df[col] = df[col].apply(clean_number)
 
-    # Drop blank row and national total
+    # Drop blank row
     df = df[df["region_name"] != "nan"]
     df = df[df["region_name"] != ""]
+
+    # Save national total separately
     national = df[df["region_name"] == "Kyrgyzstan"].copy()
     national.to_csv(OUTDIR / "kyrgyzstan_urban_rural_national.csv", index=False)
 
+    # Keep only regional rows
     regional = df[df["region_name"] != "Kyrgyzstan"].copy()
+    regional["country"] = "Kyrgyzstan"
+
+    # Fix missing rural values for city-only regions like Bishkek
+    regional["urban_population"] = pd.to_numeric(regional["urban_population"], errors="coerce")
+    regional["rural_population"] = pd.to_numeric(regional["rural_population"], errors="coerce").fillna(0)
+
+    # Recompute total from the two components so it stays consistent
+    regional["total_population"] = regional["urban_population"] + regional["rural_population"]
 
     regional["urban_percent"] = regional["urban_population"] / regional["total_population"] * 100
     regional["rural_percent"] = regional["rural_population"] / regional["total_population"] * 100
-    regional["country"] = "Kyrgyzstan"
 
     regional.to_csv(OUTDIR / "urban_rural_long.csv", index=False)
 
     print(f"Wrote {OUTDIR / 'urban_rural_long.csv'}")
     print(f"Wrote {OUTDIR / 'kyrgyzstan_urban_rural_national.csv'}")
+
+    print("\nCheck Bishkek:")
+    print(
+        regional[
+            regional["region_name"].str.contains("Bishkek", case=False, na=False)
+        ].to_string(index=False)
+    )
 
 if __name__ == "__main__":
     main()

@@ -37,8 +37,8 @@ def main():
     }
     gdf["region_name"] = gdf["region_name"].replace(NAME_FIXES)
 
-    gdf["country"] = "Tajikistan"
-    gdf["region_key"] = "TJK_" + gdf["region_name"].apply(slugify)
+    gdf["country"] = "Turkmenistan"
+    gdf["region_key"] = "TKM_" + gdf["region_name"].apply(slugify)
 
     OUTFILE.parent.mkdir(parents=True, exist_ok=True)
     gdf.to_file(OUTFILE, driver="GeoJSON")

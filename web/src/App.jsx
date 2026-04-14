@@ -72,6 +72,24 @@ const COUNTRY_CONFIG = {
         ],
         defaultLayer: "urban",
     },
+    tajikistan: {
+        label: "Tajikistan",
+        hasEthnicity: false,
+        hasUrban: true,
+        layers: [
+            { value: "urban", label: "Urban share" },
+        ],
+        defaultLayer: "urban",
+    },
+    turkmenistan: {
+        label: "Turkmenistan",
+        hasEthnicity: false,
+        hasUrban: true,
+        layers: [
+            { value: "urban", label: "Urban share" },
+        ],
+        defaultLayer: "urban",
+    },
 };
 
 export default function App() {

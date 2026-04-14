@@ -26,6 +26,14 @@ export default function Methodology() {
                 <b>Uzbekistan</b>: 2023 rural/urban population from <a href="https://stat.uz/en/official-statistics/demography">Uzbek national statistics site</a> and Level-1 administrative boundaries in GeoJSON format from <a href="https://simplemaps.com/gis/country/uz">Simple Maps</a>
             </p>
 
+            <p>
+                <b>Tajikistan</b>: 2020 rural/urban population from the <a href="https://www.stat.tj/en/population-and-housing-census/">census</a> and Level-1 administrative boundaries in GeoJSON format from <a href="https://simplemaps.com/gis/country/tj">Simple Maps</a>
+            </p>
+
+            <p>
+                <b>Turkmenistan</b>: 2022 rural/urban population from the <a href="https://www.stat.gov.tm/en/population-census">census</a> and Level-1 administrative boundaries in GeoJSON format from <a href="https://simplemaps.com/gis/country/tj">Simple Maps</a>
+            </p>
+
             <h3>Definitions</h3>
             <p>
                 <strong>Dominant ethnicity</strong> is the ethnic group with the largest recorded

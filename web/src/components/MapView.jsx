@@ -174,6 +174,7 @@ export default function MapView({
     viewMode,
     onSelectRegion,
     selectedRegion,
+    comparedRegions,
 }) {
     const geoJsonRef = useRef(null);
 
@@ -215,8 +216,11 @@ export default function MapView({
 
     function getBaseStyle(feature) {
         const props = feature.properties || {};
-        const isSelected = selectedRegion?.region_key === props.region_key;
         const value = getFeatureValue(feature);
+        const isSelected = selectedRegion?.region_key === props.region_key;
+        const isCompared = (comparedRegions || []).some(
+            (r) => r.region_key === props.region_key
+        );
 
         let fillColor = "#cbd5e1";
 
@@ -232,9 +236,9 @@ export default function MapView({
 
         return {
             fillColor,
-            weight: isSelected ? 3 : 1.2,
+            weight: isSelected || isCompared ? 3 : 1.2,
             opacity: 1,
-            color: isSelected ? "#111827" : "#ffffff",
+            color: isSelected ? "#111827" : isCompared ? "#475569" : "#ffffff",
             fillOpacity: 0.84,
         };
     }
@@ -303,8 +307,8 @@ export default function MapView({
                 }`;
         } else if (viewMode === "density") {
             body = `Population density: ${props.population_density != null
-                    ? Number(props.population_density).toFixed(1) + " people/km²"
-                    : "n/a"
+                ? Number(props.population_density).toFixed(1) + " people/km²"
+                : "n/a"
                 }`;
         } else {
             const pct = ethnicityLookup?.[regionKey]?.[selectedEthnicity];

@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import MapView from "./components/MapView";
 import Methodology from "./components/Methodology";
 import SidebarFooter from "./components/SidebarFooter";
+import ComparisonPanel from "./components/ComparisonPanel";
+
 
 const panelStyle = {
     background: "rgba(255,255,255,0.88)",
@@ -113,6 +115,8 @@ const COUNTRY_CONFIG = {
     },
 };
 
+
+
 export default function App() {
     const [regions, setRegions] = useState(null);
     const [ethnicityStats, setEthnicityStats] = useState([]);
@@ -125,6 +129,28 @@ export default function App() {
     const countryConfig = COUNTRY_CONFIG[selectedCountry];
     const countryLabel = countryConfig.label;
     const availableLayers = countryConfig.layers;
+    const [comparisonMode, setComparisonMode] = useState(false);
+    const [comparedRegions, setComparedRegions] = useState([]);
+
+    function handleRegionSelect(region) {
+        if (!comparisonMode) {
+            setSelectedRegion(region);
+            return;
+        }
+
+        setComparedRegions((prev) => {
+            const alreadySelected = prev.some((r) => r.region_key === region.region_key);
+
+            if (alreadySelected) {
+                return prev.filter((r) => r.region_key !== region.region_key);
+            }
+
+            if (prev.length === 0) return [region];
+            if (prev.length === 1) return [prev[0], region];
+
+            return [prev[0], region];
+        });
+    }
 
 
     useEffect(() => {
@@ -132,6 +158,8 @@ export default function App() {
         setEthnicityStats([]);
         setUrbanStats([]);
         setSelectedRegion(null);
+        setComparedRegions([]);
+        setComparisonMode(false);
 
         fetch(`/data/${selectedCountry}/regions.geojson`)
             .then((res) => res.json())
@@ -281,6 +309,7 @@ export default function App() {
                                         {selectedRegion.region_name}
                                     </div>
 
+
                                     {viewMode === "ethnicity" || viewMode === "diversity" ? (
                                         <>
                                             <div style={{ display: "grid", gap: "0.55rem", color: "#374151" }}>
@@ -382,6 +411,42 @@ export default function App() {
                                 </div>
                             )}
                         </div>
+
+                        <div style={{ ...panelStyle, padding: "1rem" }}>
+                            <div style={sectionTitleStyle}>Compare regions</div>
+
+                            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                                <button
+                                    onClick={() => {
+                                        setComparisonMode((v) => !v);
+                                        setComparedRegions([]);
+                                    }}
+                                    style={tabButton(comparisonMode)}
+                                >
+                                    {comparisonMode ? "Exit compare" : "Start compare"}
+                                </button>
+                                {comparedRegions.length > 0 && (
+                                    <button
+                                        onClick={() => setComparedRegions([])}
+                                        style={tabButton(false)}
+                                    >
+                                        Clear
+                                    </button>
+                                )}
+                            </div>
+
+                            <div style={{ color: "#6b7280", lineHeight: 1.6, marginBottom: "0.75rem" }}>
+                                {comparisonMode
+                                    ? "Click up to two regions on the map to compare them."
+                                    : "Turn on compare mode to inspect two regions side by side."}
+                            </div>
+
+                            <ComparisonPanel
+                                comparedRegions={comparedRegions}
+                                viewMode={viewMode}
+                                selectedEthnicity={selectedEthnicity}
+                            />
+                        </div>
                     </div>
                 ) : (
                     <div style={{ ...panelStyle, padding: "1rem", color: "#6b7280", lineHeight: 1.6 }}>
@@ -416,9 +481,10 @@ export default function App() {
                             urbanStats={urbanStats}
                             selectedEthnicity={selectedEthnicity}
                             viewMode={viewMode}
-                            onSelectRegion={setSelectedRegion}
+                            onSelectRegion={handleRegionSelect}
                             selectedRegion={selectedRegion}
                             countryLabel={countryLabel}
+                            comparedRegions={comparedRegions}
                         />
                     )
                 ) : (

@@ -9,6 +9,10 @@ export default function Methodology() {
                 This map shows regional data across Central Asia using level-1
                 administrative boundaries.
             </p>
+            <hr></hr>
+            <h3>Current Coverage</h3>
+            <p>Urban/rural population and density are available for all five Central Asian countries. Ethnicity and diversity index layers are currently only available for Kazakhstan and Kyrgyzstan due to data avilability.</p>
+            <hr></hr>
             <h3>Data sources</h3>
             <p>
                 <b>Kazakhstan</b>: March 2026 regional ethnicity counts and 2025 rural/urban populations from <a href="https://stat.gov.kz/en/industries/social-statistics/demography/spreadsheets/?year=&name=38041&period=&type=">the Kazakh bureau of national statistics</a>  and
@@ -33,18 +37,18 @@ export default function Methodology() {
             <p>
                 <b>Turkmenistan</b>: 2022 rural/urban population from the <a href="https://www.stat.gov.tm/en/population-census">census</a> and Level-1 administrative boundaries in GeoJSON format from <a href="https://simplemaps.com/gis/country/tj">Simple Maps</a>
             </p>
-
+            <hr></hr>
             <h3>Definitions</h3>
             <p>
-                <strong>Dominant ethnicity</strong> is the ethnic group with the largest recorded
+                <strong>Dominant ethnicity:</strong> the ethnic group with the largest recorded
                 population in a region.
             </p>
             <p>
-                <strong>Diversity index</strong> is the Shannon diversity measure calculated from
+                <strong>Diversity index:</strong> the Shannon diversity measure calculated from
                 the population shares of ethnic groups within each region. Higher values indicate
                 a more mixed ethnic composition.
             </p>
-
+            <hr></hr>
             <h3>Caveats</h3>
             <ul>
                 <li>Results depend on the regional categories and naming conventions used in the source tables.</li>
@@ -52,7 +56,7 @@ export default function Methodology() {
                 <li>Crosswalk mappings may simplify or harmonize source geography to match the boundary dataset.</li>
                 <li>Ethnicity is not the same as language, nationality, or identity in all contexts.</li>
             </ul>
-
+            <hr></hr>
             <h3>Processing steps</h3>
             <ol>
                 <li>Reshaped the original tables from wide format into long format.</li>
